@@ -75,7 +75,7 @@ unset snapshots
 oldIFS=$IFS
 IFS=$'\n'
 
-for snap in $($bindir/btrfs subvolume list -sa / --sort=-ogen | $bindir/awk '{gsub(/^.*<FS_TREE>\//,"",$NF);print $11" "$12"?"$NF}'); do
+for snap in $($bindir/btrfs subvolume list -sa /boot --sort=-ogen | $bindir/awk '{gsub(/^.*<FS_TREE>\//,"",$NF);print $11" "$12"?"$NF}'); do
         snap_name="${snap#*"?"}"
         # Discard deleted snapshots
         if [ $snap_name = "DELETED" ]; then continue; fi
@@ -118,31 +118,17 @@ for kernel in ${nkernel[@]}; do
 				fi
 				echo	'Loading Linux snapshot ...'"
 				# Check the location of the /boot partition
-				if [ $uuid = $buuid ]; then
 					echo "\
-				linux	/$item/boot/$kernel root=UUID=$uuid rw rootflags=subvol=$item $params
+				linux	/$item/$kernel root=UUID=$uuid rw $params
 				echo    'Loading initial ramdisk ...'"
 				# Check intel microcode exist
 					if [ -f /boot/$intel_ucode ]; then
 						echo "\
-				initrd	/$item/boot/$intel_ucode /$item/boot/$init"
+				initrd	/$item/$intel_ucode /$item/$init"
 					else
 						echo "\
-				initrd	/$item/boot/$init"
+				initrd	/$item/$init"
 					fi
-				else
-					echo "\
-				linux	/$kernel root=UUID=$uuid rw rootflags=subvol=$item $params
-				echo    'Loading initial ramdisk ...'"
-				# Check intel microcode exist
-				if [ -f /boot/$intel_ucode ]; then
-						echo "\
-				initrd	/$intel_ucode /$init"
-					else
-						echo "\
-				initrd  /$init"
-					fi
-				fi
 				echo "\
 			}"
 		done
